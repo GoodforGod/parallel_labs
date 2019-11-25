@@ -3,24 +3,26 @@
 #include <sys/time.h>
 #include <math.h>
 
-void generate_m1(double *m1, int max, int A, int i)
+void generate_m1(double *m1, int max, int A, int cycle)
 {
     for(int i=0;i<max;i++)
     {
-        unsigned int seed = i;
+        unsigned int seed = i * cycle + cycle;
         double rand = ((double)rand_r(&seed) / RAND_MAX) * A + 1;
+        //printf("\nRand M1: %f", rand);
         m1[i] = rand;
     }
 
     printf("\nArray M1 filled.");
 }
 
-void generate_m2(double *m2, int max, int A, int i)
+void generate_m2(double *m2, int max, int A, int cycle)
 {
     for(int i=0;i<max;i++)
     {
-        unsigned int seed = i;
-        double rand = ((double)rand_r(&seed) / RAND_MAX) * 10 + A;
+        unsigned int seed = i * cycle + cycle;
+        double rand = ((double)rand_r(&seed) / RAND_MAX) * A * 9 + A;
+        //printf("\nRand M2: %f", rand);
         m2[i] = rand;
     }
 
@@ -82,7 +84,8 @@ void sort_grome(double *m2, int size)
             }
         }
     }
-    printf("\nArray sorted.");
+
+    printf("\nArray sorted with first elem: %f and last: %f", m2[0], m2[size-1]);
 }
 
 double find_min(double *m2, int size) {
@@ -90,11 +93,18 @@ double find_min(double *m2, int size) {
 
     for(int i=1;i<size;i++)
     {
+        if(min == 0 && m2[i] != 0)
+        {
+            min = m2[i];
+        }
+
         if (m2[i] < min && m2[i] != 0)
         {
               min = m2[i];
         }
     }
+
+    printf("\nMin number: %f", min);
 
     return min;
 }
@@ -109,7 +119,8 @@ double reduce(double *m2, int size)
         int temp = (int) (m2[i] / min);
         if (temp%2 == 0)
         {
-            sum = sin(m2[i]);
+            sum += sin(m2[i]);
+            //printf("\nMatch for %d.", temp);
         }
     }
 
@@ -127,7 +138,7 @@ int main(int argc, char *argv[])
 	gettimeofday(&T1, NULL);
 
 
-	for(i=0;i<5;i++)
+	for(i=1;i<5;i++)
 	{
 		srand(i);
         double m1[N], m2[N / 2];
@@ -149,7 +160,7 @@ int main(int argc, char *argv[])
         // Reduce
         double reduced = reduce(m2, N/2);
 
-        printf("\nReduced number - %f for I - %d and N - %d", reduced, i, N);
+        printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
 	}
 
 	gettimeofday(&T2, NULL);
