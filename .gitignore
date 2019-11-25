@@ -1,0 +1,9 @@
+.idea
+.idea/$PRODUCT_WORKSPACE_FILE$
+.idea/.gitignore
+.idea/codeStyles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/parallel_labs.iml
+.idea/sbt.xml
+.idea/vcs.xml
