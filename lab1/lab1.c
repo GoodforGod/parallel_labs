@@ -3,26 +3,24 @@
 #include <sys/time.h>
 #include <math.h>
 
-void generate_m1(double *m1, int max, int A, int cycle)
+void generate_m1(double *m1, int max, int A, unsigned int *cycle)
 {
     for(int i=0;i<max;i++)
     {
-        unsigned int seed = i * cycle + cycle;
-        double rand = ((double)rand_r(&seed) / RAND_MAX) * A + 1;
-        //printf("\nRand M1: %f", rand);
+        double rand = ((double)rand_r(cycle) / RAND_MAX) * A + 1;
+        printf("\nRand M1: %f", rand);
         m1[i] = rand;
     }
 
     printf("\nArray M1 filled.");
 }
 
-void generate_m2(double *m2, int max, int A, int cycle)
+void generate_m2(double *m2, int max, int A, unsigned int *cycle)
 {
     for(int i=0;i<max;i++)
     {
-        unsigned int seed = i * cycle + cycle;
-        double rand = ((double)rand_r(&seed) / RAND_MAX) * A * 9 + A;
-        //printf("\nRand M2: %f", rand);
+        double rand = ((double)rand_r(cycle) / RAND_MAX) * A * 9 + A;
+        printf("\nRand M2: %f", rand);
         m2[i] = rand;
     }
 
@@ -142,10 +140,11 @@ int main(int argc, char *argv[])
 	{
 		srand(i);
         double m1[N], m2[N / 2];
+        unsigned int seed = i;
 
 		// Array init
-		generate_m1(m1, N, A, i);
-		generate_m2(m2, N/2, A, i);
+		generate_m1(m1, N, A, &seed);
+		generate_m2(m2, N/2, A, &seed);
 
         // Map
         map_pi_operation(m1, N);
