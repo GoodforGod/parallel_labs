@@ -8,11 +8,11 @@ void generate_m1(double *m1, int max, int A, unsigned int *cycle)
     for(int i=0;i<max;i++)
     {
         double rand = ((double)rand_r(cycle) / RAND_MAX) * A + 1;
-        printf("\nRand M1: %f", rand);
+        //printf("\nRand M1: %f", rand);
         m1[i] = rand;
     }
 
-    printf("\nArray M1 filled.");
+    //printf("\nArray M1 filled.");
 }
 
 void generate_m2(double *m2, int max, int A, unsigned int *cycle)
@@ -20,11 +20,11 @@ void generate_m2(double *m2, int max, int A, unsigned int *cycle)
     for(int i=0;i<max;i++)
     {
         double rand = ((double)rand_r(cycle) / RAND_MAX) * A * 9 + A;
-        printf("\nRand M2: %f", rand);
+        //printf("\nRand M2: %f", rand);
         m2[i] = rand;
     }
 
-    printf("\nArray M2 filled.");
+    //printf("\nArray M2 filled.");
 }
 
 // 5
@@ -32,9 +32,9 @@ void map_pi_operation(double *arr, int size)
 {
     for(int i=0;i<size;i++)
     {
-        arr[i] = pow(arr[i] / M_PI, 3);
+        arr[i] = pow(((double)arr[i] / M_PI), 3);
     }
-    printf("\nPI map operation finished.");
+    //printf("\nPI map operation finished.");
 }
 
 // 3
@@ -45,7 +45,7 @@ void map_tang_module_operation(double *arr, int size)
     {
         arr[i] = fabs(tan(arr[i-1] + arr[i]));
     }
-    printf("\nTang module map operation finished.");
+    //printf("\nTang module map operation finished.");
 }
 
 // 1
@@ -56,7 +56,7 @@ void merge_power(double *m1, double *m2, int size)
         m2[i] = pow(m1[i], m2[i]);
     }
 
-    printf("\nMerge power finished.");
+    //printf("\nMerge power finished.");
 }
 
 // 5
@@ -83,7 +83,7 @@ void sort_grome(double *m2, int size)
         }
     }
 
-    printf("\nArray sorted with first elem: %f and last: %f", m2[0], m2[size-1]);
+    //printf("\nArray sorted with first elem: %f and last: %f", m2[0], m2[size-1]);
 }
 
 double find_min(double *m2, int size) {
@@ -102,7 +102,7 @@ double find_min(double *m2, int size) {
         }
     }
 
-    printf("\nMin number: %f", min);
+    //printf("\nMin number: %f", min);
 
     return min;
 }
@@ -122,7 +122,7 @@ double reduce(double *m2, int size)
         }
     }
 
-    printf("\nArray reduced.");
+    //printf("\nArray reduced.");
 
     return sum;
 }
@@ -135,8 +135,9 @@ int main(int argc, char *argv[])
 	N = atoi(argv[1]);
 	gettimeofday(&T1, NULL);
 
+	double results[50];
 
-	for(i=1;i<5;i++)
+	for(i=1;i<=50;i++)
 	{
 		srand(i);
         double m1[N], m2[N / 2];
@@ -159,7 +160,14 @@ int main(int argc, char *argv[])
         // Reduce
         double reduced = reduce(m2, N/2);
 
-        printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
+		results[i-1] = reduced;
+        //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
+	}
+	
+    printf("R\t|\tI\t|\tN\n");
+	for(i=0;i<50;i++)
+	{
+        printf("%10f|%10d|%10d\n", results[i], i, N);
 	}
 
 	gettimeofday(&T2, NULL);
