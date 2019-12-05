@@ -5,7 +5,8 @@
 
 void generate_m1(long double *m1, int max, int A, unsigned int *cycle)
 {
-    for(int i=0;i<max;i++)
+    int i;
+    for(i=0;i<max;i++)
     {
         int random = rand_r(cycle);
         long double rand = ((long double)random / RAND_MAX) * A + 1;
@@ -18,7 +19,8 @@ void generate_m1(long double *m1, int max, int A, unsigned int *cycle)
 
 void generate_m2(long double *m2, int max, int A, unsigned int *cycle)
 {
-    for(int i=0;i<max;i++)
+    int i;
+    for(i=0;i<max;i++)
     {
         int random = rand_r(cycle);
         long double rand = ((long double)random / RAND_MAX) * A * 9 + A;
@@ -32,7 +34,8 @@ void generate_m2(long double *m2, int max, int A, unsigned int *cycle)
 // 5
 void map_pi_operation(long double *arr, int size)
 {
-    for(int i=0;i<size;i++)
+    int i;
+    for(i=0;i<size;i++)
     {
         arr[i] = pow((long double)arr[i] / (long double)M_PI, 3);
     }
@@ -43,7 +46,8 @@ void map_pi_operation(long double *arr, int size)
 void map_tang_module_operation(long double *arr, int size)
 {
     arr[0] = fabs(tan(arr[0]));
-    for(int i=1;i<size;i++)
+    int i;
+    for(i=1;i<size;i++)
     {
         arr[i] = fabs((long double)tan((long double)arr[i-1] + arr[i]));
     }
@@ -53,7 +57,8 @@ void map_tang_module_operation(long double *arr, int size)
 // 1
 void merge_power(long double *m1, long double *m2, int size)
 {
-    for(int i=0;i<size;i++)
+    int i;
+    for(i=0;i<size;i++)
     {
         //printf("\nBefore merge M1: %Lf, M2: %Lf", m1[i], m2[i]);
         m2[i] = (long double) pow(m1[i], m2[i]);
@@ -93,7 +98,8 @@ void sort_grome(long double *m2, int size)
 double find_min(long double *m2, int size) {
     long double min = m2[0];
 
-    for(int i=1;i<size;i++)
+    int i;
+    for(i=1;i<size;i++)
     {
         if(min == 0 && m2[i] != 0)
         {
@@ -116,7 +122,8 @@ long double reduce(long double *m2, int size)
     long double min = find_min(m2, size);
     long double sum = 0;
 
-    for(int i=0;i<size;i++)
+    int i;
+    for(i=0;i<size;i++)
     {
         long temp = (long) ((long)m2[i] / (long)min);
         if (temp % 2 == 0)
