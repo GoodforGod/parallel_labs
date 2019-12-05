@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
         //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
 	}
 	
-    printf("\nR\t|\tI\t|\tN\n");
+    printf("\n%10c|%10c|%10c\n", 'R', 'I', 'N');
 	for(i=0;i<50;i++)
 	{
         printf("%10Lf|%10d|%10d\n", results[i], i, N);
