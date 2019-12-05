@@ -3,7 +3,7 @@
 runs=()
 for i in {1..10}
 do
-	millis=$(./lab1-seq $1 | tail -1 | grep -Eo " [0-9]+")
+	millis=$(./lab1-seq $1 | tail -1 | grep -Eo "[0-9]+$")
 	runs+=(${millis})
 	echo "$i run completed in $millis millis."
 done
