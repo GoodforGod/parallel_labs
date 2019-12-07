@@ -12,7 +12,7 @@ void generate_m1(Fw64f *m1, int max, int A, unsigned int *cycle)
     {
         int random = rand_r(cycle);
         Fw64f rand = ((Fw64f)random / RAND_MAX) * A + 1;
-        //printf("\nRandom: %d, Rand M1: %Lf", random, rand);
+        //printf("\nRandom: %d, Rand M1: %f", random, rand);
         m1[i] = rand;
     }
 
@@ -26,7 +26,7 @@ void generate_m2(Fw64f *m2, int max, int A, unsigned int *cycle)
     {
         int random = rand_r(cycle);
         Fw64f rand = ((Fw64f)random / RAND_MAX) * A * 9 + A;
-        //printf("\nRandom: %d, Rand M1: %Lf", random, rand);
+//        printf("\nRandom: %d, Rand M1: %f", random, rand);
         m2[i] = rand;
     }
 
@@ -52,8 +52,11 @@ void map_pi_operation(Fw64f *arr, Fw64f *divArg, Fw64f *powArg, int size)
 // 3
 void map_tang_module_operation(Fw64f *arr, Fw64f* shiftArr, int size)
 {
-    fwsAdd_64f(arr, shiftArr, arr, size);
 //    int i;
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, BEFORE ADD operation: %f", i, arr[i]);
+
+    fwsAdd_64f(arr, shiftArr, arr, size);
 //    for(i=0;i<size;i++)
 //        printf("\nM2: %d, AFTER ADD operation: %f", i, arr[i]);
 
@@ -108,7 +111,7 @@ void sort_grome(Fw64f *m2, int size)
         }
     }
 
-    //printf("\nArray sorted with first elem: %f and last: %f", m2[0], m2[size-1]);
+//    printf("\nArray sorted with first elem: %f and last: %f", m2[0], m2[size-1]);
 }
 
 double find_min(Fw64f *m2, int size) {
@@ -151,10 +154,10 @@ Fw64f reduce(Fw64f *m2, int size)
                 sum += (Fw64f) value;
 //                printf("\nREDUCED SUM: %f", sum);
             }
-            else
-            {
-                printf("\nValue is invalid: %f", value);
-            }
+//            else
+//            {
+//                printf("\nValue is invalid: %f", value);
+//            }
         }
 //        else
 //        {
@@ -169,7 +172,7 @@ Fw64f reduce(Fw64f *m2, int size)
 
 int main(int argc, char *argv[])
 {
-	int i,N,j, A = 300, total = 5, fw_threads = 1;
+	int i,N,j, A = 300, total = 50, fw_threads = 1;
 	struct timeval T1, T2;
 	long delta_ms;
 	N = atoi(argv[1]);
@@ -213,26 +216,22 @@ int main(int argc, char *argv[])
         for(j=1;j<halfN;j++)
             mapIncArr[j] = m2[j - 1];
 //        for(j=0;j<halfN;j++)
-//        {
 //            printf("\nM2 origin: %f", m2[j]);
-//        }
 //        for(j=0;j<halfN;j++)
-//        {
 //            printf("\nM2 shifted: %f", mapIncArr[j]);
-//        }
 
         // Map M2
         //mapIncArr = memcpy(&mapIncArr[1], &m2[1], (halfN - 1) * sizeof(Fw64f));
-        map_tang_module_operation(m2, mapIncArr, N/2);
+        map_tang_module_operation(m2, mapIncArr, halfN);
 
         // Merge
-        merge_power(m1, m2, N/2);
+        merge_power(m1, m2, halfN);
 
         // Sort
-        sort_grome(m2, N/2);
+        sort_grome(m2, halfN);
 
         // Reduce
-        Fw64f reduced = reduce(m2, N/2);
+        Fw64f reduced = reduce(m2, halfN);
 
 		results[i-1] = reduced;
         //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
@@ -240,9 +239,7 @@ int main(int argc, char *argv[])
 	
     printf("\n%10c|%10c|%10c\n", 'R', 'I', 'N');
 	for(i=0;i<total;i++)
-	{
         printf("%10f|%10d|%10d\n", results[i], i, N);
-	}
 
 	gettimeofday(&T2, NULL);
 	delta_ms = 1000 * (T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;

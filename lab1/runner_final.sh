@@ -5,6 +5,11 @@ runs=()
 labs=(lab1-seq lab1-par-2 lab1-par-4 lab1-par-6 lab1-par-8)
 #, lab1-seq, lab1-seq, lab1-seq)
 
+# N1 - 300
+# N2 - 7400
+# STEP - 710
+# STEPS - 10
+
 for lab in ${labs[@]}
 do
     for i in {0..10}
