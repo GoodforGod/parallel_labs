@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <math.h>
+#include "framewave/fwSignal.h"
 
 void generate_m1(long double *m1, int max, int A, unsigned int *cycle)
 {
@@ -37,6 +38,10 @@ void map_pi_operation(long double *arr, int size)
     int i;
     for(i=0;i<size;i++)
     {
+	Fw64f* res = NULL;
+	const Fw64f arg1 = (Fw64f) arr[i];
+	const Fw64f arg2 = 3;
+	fwsPow_64f_A50(&arg1, &arg2, res, 1);
         arr[i] = pow((long double)arr[i] / (long double)M_PI, 3);
     }
     //printf("\nPI map operation finished.");
