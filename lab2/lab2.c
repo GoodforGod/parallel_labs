@@ -34,35 +34,15 @@ void generate_m2(Fw64f *m2, int max, int A, unsigned int *cycle)
 }
 
 // 5
-//void map_pi_operation(Fw64f *arr, int size)
-//{
-//    int i;
-//    for(i=0;i<size;i++)
-//    {
-//        Fw64f* res = NULL;
-//        const Fw64f arg1 = (Fw64f) arr[i];
-//        const Fw64f arg2 = 3;
-//        fwsPow_64f_A50(&arg1, &arg2, res, 1);
-//        arr[i] = pow((Fw64f)arr[i] / (Fw64f)M_PI, 3);
-//    }
-//    //printf("\nPI map operation finished.");
-//}
-
-
-// 5
-void map_pi_operation_amd(Fw64f *arr, Fw64f *divArg, Fw64f *powArg, int size)
+void map_pi_operation(Fw64f *arr, Fw64f *divArg, Fw64f *powArg, int size)
 {
 //    int i;
 //    for(i=0;i<size;i++)
-//    {
 //        printf("\nM1: %d, BEFORE map pi operation: %f", i, arr[i]);
-//    }
 
     fwsDiv_64f_A50(arr, divArg, arr, size);
 //    for(i=0;i<size;i++)
-//    {
 //        printf("\nM1: %d, AFTER DIV operation: %f", i, arr[i]);
-//    }
 
     fwsPow_64f_A50(arr, powArg, arr, size);
 //    for(i=0;i<size;i++)
@@ -72,27 +52,36 @@ void map_pi_operation_amd(Fw64f *arr, Fw64f *divArg, Fw64f *powArg, int size)
 // 3
 void map_tang_module_operation(Fw64f *arr, Fw64f* shiftArr, int size)
 {
-    arr[0] = fabs(tan(arr[0]));
-    int i;
-    for(i=1;i<size;i++)
-    {
-        arr[i] = fabs((Fw64f)tan((Fw64f)arr[i-1] + arr[i]));
-    }
-    //printf("\nTang module map operation finished.");
+    fwsAdd_64f(arr, shiftArr, arr, size);
+//    int i;
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, AFTER ADD operation: %f", i, arr[i]);
+
+    fwsTan_64f_A50(arr, arr, size);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, AFTER TAN operation: %f", i, arr[i]);
+
+    fwsAbs_64f_I(arr, size);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, AFTER ABS operation: %f", i, arr[i]);
+
+//    printf("\nTang module map operation finished.");
 }
 
 // 1
 void merge_power(Fw64f *m1, Fw64f *m2, int size)
 {
-    int i;
-    for(i=0;i<size;i++)
-    {
-        //printf("\nBefore merge M1: %Lf, M2: %Lf", m1[i], m2[i]);
-        m2[i] = (Fw64f) pow(m1[i], m2[i]);
-        //printf("\nAfter merge M2: %Lf", m2[i]);
-    }
+//    int i;
+//    for(i=0;i<size;i++)
+//        printf("\nM1: %d, BEFORE POW MERGE operation: %f", i, m1[i]);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, BEFORE POW MERGE operation: %f", i, m2[i]);
 
-    //printf("\nMerge power finished.");
+    fwsPow_64f_A50(m1, m2, m2, size);
+
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, AFTER POW MERGE operation: %f", i, m2[i]);
+//    printf("\nMerge power finished.");
 }
 
 // 5
@@ -162,10 +151,10 @@ Fw64f reduce(Fw64f *m2, int size)
                 sum += (Fw64f) value;
 //                printf("\nREDUCED SUM: %f", sum);
             }
-//            else
-//            {
-//                printf("\nValue is invalid: %f", value);
-//            }
+            else
+            {
+                printf("\nValue is invalid: %f", value);
+            }
         }
 //        else
 //        {
@@ -180,12 +169,17 @@ Fw64f reduce(Fw64f *m2, int size)
 
 int main(int argc, char *argv[])
 {
-	int i,N,j, A = 300, total = 5;
+	int i,N,j, A = 300, total = 5, fw_threads = 1;
 	struct timeval T1, T2;
 	long delta_ms;
 	N = atoi(argv[1]);
     int halfN = N/2;
-	gettimeofday(&T1, NULL);
+
+	if(argc > 2)
+	    fw_threads = atoi(argv[2]);
+
+    fwSetNumThreads(fw_threads);
+    printf("Framewave threads number: %d", fw_threads);
 
 	Fw64f results[total];
 
@@ -201,6 +195,7 @@ int main(int argc, char *argv[])
     // MAP tang operation
     Fw64f* mapIncArr = malloc(N / 2 * sizeof(Fw64f));
 
+	gettimeofday(&T1, NULL);
 	for(i=1;i<=total;i++)
 	{
         Fw64f m1[N], m2[halfN];
@@ -212,8 +207,8 @@ int main(int argc, char *argv[])
 		generate_m1(m1, N, A, &seed);
 		generate_m2(m2, halfN, A, &seed);
 
-        // Map
-        map_pi_operation_amd(m1, mapDivArg, mapPowArg, N);
+        // Map M1
+        map_pi_operation(m1, mapDivArg, mapPowArg, N);
 
         for(j=1;j<halfN;j++)
             mapIncArr[j] = m2[j - 1];
@@ -226,6 +221,7 @@ int main(int argc, char *argv[])
 //            printf("\nM2 shifted: %f", mapIncArr[j]);
 //        }
 
+        // Map M2
         //mapIncArr = memcpy(&mapIncArr[1], &m2[1], (halfN - 1) * sizeof(Fw64f));
         map_tang_module_operation(m2, mapIncArr, N/2);
 
