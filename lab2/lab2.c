@@ -114,31 +114,9 @@ void sort_grome(Fw64f *m2, int size)
 //    printf("\nArray sorted with first elem: %f and last: %f", m2[0], m2[size-1]);
 }
 
-double find_min(Fw64f *m2, int size) {
-    Fw64f min = m2[0];
-
-    int i;
-    for(i=1;i<size;i++)
-    {
-        if(min == 0 && m2[i] != 0)
-        {
-            min = m2[i];
-        }
-
-        if (m2[i] < min && m2[i] != 0)
-        {
-              min = m2[i];
-        }
-    }
-
-    //printf("\nMin number: %f", min);
-
-    return min;
-}
-
 Fw64f reduce(Fw64f *m2, int size)
 {
-    Fw64f min = find_min(m2, size);
+    Fw64f min = m2[0];
     Fw64f sum = 0;
 
     int i;
