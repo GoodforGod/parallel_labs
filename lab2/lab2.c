@@ -114,9 +114,28 @@ void sort_grome(Fw64f *m2, int size)
 //    printf("\nArray sorted with first elem: %f and last: %f", m2[0], m2[size-1]);
 }
 
+Fw64f get_min(Fw64f *m2, int size)
+{
+    int i;
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, AT SORT operation: %f", i, m2[i]);
+
+    for(i=0;i<size;i++)
+    {
+        if(fabs(m2[i]) >= 0.000000000000001)
+        {
+//            printf("\nFound min: %f", m2[i]);
+            return m2[i];
+        }
+    }
+
+
+    return m2[0];
+}
+
 Fw64f reduce(Fw64f *m2, int size)
 {
-    Fw64f min = m2[0];
+    Fw64f min = get_min(m2, size);
     Fw64f sum = 0;
 
     int i;
