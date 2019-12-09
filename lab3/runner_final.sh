@@ -41,7 +41,6 @@ do
 #        echo "$lab: All: ${iteration[@]} for i: $i"
 #        echo "$lab: Average: $avg for i: $i"
         runs+=(${avg})
-        #echo "Seq $i run completed in $millis millis for N $N."
     done
 
     last=$(($1 + 10 * $2))

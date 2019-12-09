@@ -6,13 +6,13 @@
 # STEPS - 10
 # STEP - (9200 - 400) / 10 = 880
 
-labs=(lab3-mp)
+labs=(lab4-mp)
 
 runs=()
 
-labs_source=(lab3-dynamic-mp lab3-static-mp lab3-guided-mp)
+labs_source=()
 
-suffixes=(-4 -8 -16 -25 -32 -128)
+suffixes=()
 
 for lab in ${labs_source[@]}
 do
@@ -29,7 +29,7 @@ do
     for i in {0..10}
     do
         iteration=()
-        N=$(($1 - i * $2))
+        N=$(($1 + i * $2))
         for run in {1..10}
         do
             millis=$(./${lab} ${N} | tail -1 | grep -Eo "[0-9]+$")
@@ -43,7 +43,7 @@ do
         runs+=(${avg})
     done
 
-    last=$(($1 - 10 * $2))
+    last=$(($1 + 10 * $2))
     echo "$lab: From '$1' To '$last' with '$2' Step"
     echo "$lab: ALL: ${runs[@]}"
     sum=$(echo "${runs[@]/%/+} 0" | bc)
