@@ -170,11 +170,12 @@ int main(int argc, char *argv[])
 	struct timeval T1, T2;
 	long delta_ms;
 	N = atoi(argv[1]);
-	gettimeofday(&T1, NULL);
 
 	double results[total];
 
-//    #pragma omp parallel for default(none) private(i) shared(A, N, total, results)
+	gettimeofday(&T1, NULL);
+
+    #pragma omp parallel for default(none) private(i) shared(A, N, total, results)
 	for(i=1;i<=total;i++)
 	{
         double m1[N], m2[N / 2], m2_init[N / 2];
@@ -202,12 +203,12 @@ int main(int argc, char *argv[])
 		results[i-1] = reduced;
         //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
 	}
-	
+	gettimeofday(&T2, NULL);
+
     printf("\n%10c|%10c|%10c\n", 'R', 'I', 'N');
 	for(i=0;i<total;i++)
         printf("%10f|%10d|%10d\n", results[i], i, N);
 
-	gettimeofday(&T2, NULL);
 	delta_ms = 1000 * (T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
 	printf("\nN=%d. Millie's passed: %ld\n", N, delta_ms);
 	return 0;

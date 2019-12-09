@@ -34,17 +34,17 @@ void generate_m2(Fw64f *m2, int max, int A, unsigned int *cycle)
 }
 
 // 5
-void map_pi_operation(Fw64f *arr, Fw64f *divArg, Fw64f *powArg, int size)
+void map_pi_operation(Fw64f *arr, int size)
 {
 //    int i;
 //    for(i=0;i<size;i++)
 //        printf("\nM1: %d, BEFORE map pi operation: %f", i, arr[i]);
 
-    fwsDiv_64f_A50(arr, divArg, arr, size);
+    fwsDivC_64f(arr, (Fw64f) M_PI, arr, size);
 //    for(i=0;i<size;i++)
 //        printf("\nM1: %d, AFTER DIV operation: %f", i, arr[i]);
 
-    fwsPow_64f_A50(arr, powArg, arr, size);
+    fwsPowx_64f_A50(arr, 3, arr, size);
 //    for(i=0;i<size;i++)
 //        printf("\nM1: %d, AFTER POW operation: %f", i, arr[i]);
 }
@@ -183,15 +183,6 @@ int main(int argc, char *argv[])
 
 	Fw64f results[total];
 
-    // MAP pi operation
-    Fw64f* mapDivArg = malloc(N * sizeof(Fw64f));
-    Fw64f* mapPowArg = malloc(N * sizeof(Fw64f));
-    for(i=0;i<N;i++)
-    {
-        mapDivArg[i] = M_PI;
-        mapPowArg[i] = 3;
-    }
-
     // MAP tang operation
     Fw64f* mapIncArr = malloc(N / 2 * sizeof(Fw64f));
 
@@ -208,7 +199,7 @@ int main(int argc, char *argv[])
 		generate_m2(m2, halfN, A, &seed);
 
         // Map M1
-        map_pi_operation(m1, mapDivArg, mapPowArg, N);
+        map_pi_operation(m1, N);
 
         for(j=1;j<halfN;j++)
             mapIncArr[j] = m2[j - 1];
@@ -233,12 +224,12 @@ int main(int argc, char *argv[])
 		results[i-1] = reduced;
         //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
 	}
-	
+	gettimeofday(&T2, NULL);
+
     printf("\n%10c|%10c|%10c\n", 'R', 'I', 'N');
 	for(i=0;i<total;i++)
         printf("%10f|%10d|%10d\n", results[i], i, N);
 
-	gettimeofday(&T2, NULL);
 	delta_ms = 1000 * (T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
 	printf("\nN=%d. Millie's passed: %ld\n", N, delta_ms);
 	return 0;
