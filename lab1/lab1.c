@@ -154,7 +154,7 @@ double reduce(double *m2, int size)
 
 int main(int argc, char *argv[])
 {
-	int i,N, A = 300, total = 5;
+	int i,N, A = 300, total = 50;
 	struct timeval T1, T2;
 	long delta_ms;
 	N = atoi(argv[1]);
