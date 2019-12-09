@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# grep -v "^\t* *//" lab3.c
+
 runs=()
 for i in {1..10}
 do

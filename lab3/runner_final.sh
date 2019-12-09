@@ -10,6 +10,20 @@ labs=(lab3-mp)
 
 runs=()
 
+labs_source=(lab3-dynamic-mp lab3-static-mp lab3-guided-mp)
+
+suffixes=(-4 -8 -16 -25 -32 -128)
+
+for lab in ${labs_source[@]}
+do
+    labs+=(${lab})
+    for suffix in ${suffixes[@]}
+    do
+        labs+=(${lab}${suffix})
+    done
+done
+
+
 for lab in ${labs[@]}
 do
     for i in {0..10}
