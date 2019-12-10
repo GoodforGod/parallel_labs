@@ -1,11 +1,8 @@
 #!/bin/bash
 
-labs=()
+labs=(lab4 lab4-runner)
 
 suffixes=()
-
-gcc -O2 -Wall -Werror -o lab4-mp lab4.c -lm -fopenmp
-echo "OpenMP lab4.c compiled."
 
 for lab in ${labs[@]}
 do

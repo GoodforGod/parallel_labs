@@ -8,7 +8,7 @@
 # N(min) to N1 STEP - (400 - 40) / 10 = 36
 # N1 to N2 STEP - (9200 - 400) / 10 = 880
 
-labs=(lab4-mp)
+labs=(lab4-runner-mp)
 
 runs=()
 
@@ -25,13 +25,14 @@ do
     done
 done
 
+N_MIN_STEP=38
 echo "N(min) to N1 processing..."
 for lab in ${labs[@]}
 do
     for i in {0..10}
     do
         iteration=()
-        N=$((400 - i * 38))
+        N=$((400 - i * $N_MIN_STEP))
         for run in {1..10}
         do
             millis=$(./${lab} ${N} | tail -1 | grep -Eo "[0-9]+$")
@@ -41,10 +42,11 @@ do
         sum=$(echo "${iteration[@]/%/+} 0" | bc)
         avg=$((sum / 10))
         runs+=(${avg})
+#        echo "Iteration $i complete for N: $N, with avg: $avg"
     done
 
     last=$((20))
-    echo "$lab: From '$1' To '$last' with '38' Step"
+    echo "$lab: From '$1' To '$last' with '$N_MIN_STEP' Step"
     echo "$lab: ALL: ${runs[@]}"
     sum=$(echo "${runs[@]/%/+} 0" | bc)
     avg=$((sum / 10))
@@ -53,8 +55,8 @@ do
     echo '-------------------------------------------'
 done
 
-
 echo "N1 to N2 processing..."
+
 for lab in ${labs[@]}
 do
     for i in {0..10}
@@ -70,6 +72,7 @@ do
         sum=$(echo "${iteration[@]/%/+} 0" | bc)
         avg=$((sum / 10))
         runs+=(${avg})
+#        echo "Iteration $i complete for N: $N, with avg: $avg"
     done
 
     last=$(($1 + 10 * $2))
@@ -81,3 +84,4 @@ do
     echo "$lab: AVG: $avg"
     echo '-------------------------------------------'
 done
+
