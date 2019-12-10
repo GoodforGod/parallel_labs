@@ -286,11 +286,11 @@ int main(int argc, char *argv[])
 
     gettimeofday(&T1, NULL);
 
-    pthread_t process_thread;
-    if(pthread_create(&process_thread, NULL, print_process, &p_counter)) {
-        fprintf(stderr, "\nError creating progress thread");
-        return 1;
-    }
+//    pthread_t process_thread;
+//    if(pthread_create(&process_thread, NULL, print_process, &p_counter)) {
+//        fprintf(stderr, "\nError creating progress thread");
+//        return 1;
+//    }
 
     #pragma omp parallel for default(none) private(i) shared(A, N, total, results, p_counter)
 	for(i=1;i<=total;i++)
@@ -333,10 +333,10 @@ int main(int argc, char *argv[])
         t_delta = 1000 * (T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
     #endif
 
-    if(pthread_join(process_thread, NULL)) {
-        fprintf(stderr, "\nError joining progress thread");
-        return 2;
-    }
+//    if(pthread_join(process_thread, NULL)) {
+//        fprintf(stderr, "\nError joining progress thread");
+//        return 2;
+//    }
 
     printf("\n--------------------------------");
     printf("\n%14c|%14c|%14c\n", 'R', 'I', 'N');

@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # ./runner_final.sh 400 880
+# N(min) - 40
 # N1 - 400
 # N2 - 9200
 # STEPS - 10
-# STEP - (9200 - 400) / 10 = 880
+# N(min) to N1 STEP - (400 - 40) / 10 = 36
+# N1 to N2 STEP - (9200 - 400) / 10 = 880
 
 labs=(lab4-mp)
 
@@ -23,7 +25,36 @@ do
     done
 done
 
+echo "N(min) to N1 processing..."
+for lab in ${labs[@]}
+do
+    for i in {0..10}
+    do
+        iteration=()
+        N=$((400 - i * 38))
+        for run in {1..10}
+        do
+            millis=$(./${lab} ${N} | tail -1 | grep -Eo "[0-9]+$")
+            iteration+=(${millis})
+        done
 
+        sum=$(echo "${iteration[@]/%/+} 0" | bc)
+        avg=$((sum / 10))
+        runs+=(${avg})
+    done
+
+    last=$((20))
+    echo "$lab: From '$1' To '$last' with '38' Step"
+    echo "$lab: ALL: ${runs[@]}"
+    sum=$(echo "${runs[@]/%/+} 0" | bc)
+    avg=$((sum / 10))
+    runs=()
+    echo "$lab: AVG: $avg"
+    echo '-------------------------------------------'
+done
+
+
+echo "N1 to N2 processing..."
 for lab in ${labs[@]}
 do
     for i in {0..10}
@@ -38,8 +69,6 @@ do
 
         sum=$(echo "${iteration[@]/%/+} 0" | bc)
         avg=$((sum / 10))
-#        echo "$lab: All: ${iteration[@]} for i: $i"
-#        echo "$lab: Average: $avg for i: $i"
         runs+=(${avg})
     done
 
