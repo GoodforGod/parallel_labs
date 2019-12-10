@@ -2,7 +2,14 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <math.h>
-#include <omp.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#ifdef _OPENMP
+    #include <omp.h>
+#else
+    int omp_get_num_procs() { return 1;}
+#endif
 
 void generate_m1(double *m1, int max, int A, unsigned int *cycle)
 {
@@ -245,19 +252,47 @@ double reduce(double *m2, int size)
     return sum;
 }
 
+void *print_process(void *void_reduced)
+{
+    int* reduced_counter = (int*) void_reduced;
+    int i;
+    while(*reduced_counter < 100)
+    {
+        printf("[");
+        for(i=0;i<*reduced_counter / 5;i++)
+        {
+            printf("#");
+        }
+        printf("] %d%% done...\r", *reduced_counter);
+        fflush(stdout);
+        sleep(1);
+    }
+
+    return NULL;
+}
+
 int main(int argc, char *argv[])
 {
-	int i,N, A = 300, total = 50;
+	int i,N, A = 300, total = 50, p_counter = 0;
 	struct timeval T1, T2;
 	double T_1, T_2, t_delta;
 	N = atoi(argv[1]);
 
 	double results[total];
 
-    T_1 = omp_get_wtime();
-	gettimeofday(&T1, NULL);
+    #ifdef _OPENMP
+        T_1 = omp_get_wtime();
+    #endif
 
-    #pragma omp parallel for default(none) private(i) shared(A, N, total, results)
+    gettimeofday(&T1, NULL);
+
+    pthread_t process_thread;
+    if(pthread_create(&process_thread, NULL, print_process, &p_counter)) {
+        fprintf(stderr, "\nError creating progress thread");
+        return 1;
+    }
+
+    #pragma omp parallel for default(none) private(i) shared(A, N, total, results, p_counter)
 	for(i=1;i<=total;i++)
 	{
         double m1[N], m2[N / 2], m2_init[N / 2];
@@ -281,19 +316,34 @@ int main(int argc, char *argv[])
 
         // Reduce
         double reduced = reduce(m2, N/2);
-
 		results[i-1] = reduced;
+
+		#pragma omp atomic update
+        p_counter += 100 / total;
         //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
 	}
-    T_2 = omp_get_wtime();
-	gettimeofday(&T2, NULL);
 
-    printf("\n%10c|%10c|%10c\n", 'R', 'I', 'N');
+	p_counter+=100;
+    gettimeofday(&T2, NULL);
+
+    #ifdef _OPENMP
+        T_2 = omp_get_wtime();
+        t_delta = (T_2 - T_1) * 1000;
+    #else
+        t_delta = 1000 * (T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
+    #endif
+
+    if(pthread_join(process_thread, NULL)) {
+        fprintf(stderr, "\nError joining progress thread");
+        return 2;
+    }
+
+    printf("\n--------------------------------");
+    printf("\n%14c|%14c|%14c\n", 'R', 'I', 'N');
 	for(i=0;i<total;i++)
-        printf("%10f|%10d|%10d\n", results[i], i, N);
+        printf("%14f|%14d|%14d\n", results[i], i, N);
 
-	t_delta = (T_2 - T_1) * 1000;
+    printf("\nN=%d. Millie's passed: %ld\n", N, (long) t_delta);
 
-	printf("\nN=%d. Millie's passed: %ld\n", N, (long) t_delta);
 	return 0;
 }
