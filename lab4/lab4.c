@@ -252,22 +252,27 @@ double reduce(double *m2, int size)
     return sum;
 }
 
+void print_percentage(int p)
+{
+    int i;
+    printf("[");
+    for(i=0;i<p / 5;i++)
+        printf("#");
+
+    printf("] %d%% done...\r", p);
+    fflush(stdout);
+}
+
 void *print_process(void *void_reduced)
 {
     int* reduced_counter = (int*) void_reduced;
-    int i;
     while(*reduced_counter < 100)
     {
-        printf("[");
-        for(i=0;i<*reduced_counter / 5;i++)
-        {
-            printf("#");
-        }
-        printf("] %d%% done...\r", *reduced_counter);
-        fflush(stdout);
+        print_percentage(*reduced_counter);
         sleep(1);
     }
 
+    print_percentage(100);
     return NULL;
 }
 
@@ -286,11 +291,11 @@ int main(int argc, char *argv[])
 
     gettimeofday(&T1, NULL);
 
-//    pthread_t process_thread;
-//    if(pthread_create(&process_thread, NULL, print_process, &p_counter)) {
-//        fprintf(stderr, "\nError creating progress thread");
-//        return 1;
-//    }
+    pthread_t process_thread;
+    if(pthread_create(&process_thread, NULL, print_process, &p_counter)) {
+        fprintf(stderr, "\nError creating progress thread");
+        return 1;
+    }
 
     #pragma omp parallel for default(none) private(i) shared(A, N, total, results, p_counter)
 	for(i=1;i<=total;i++)
@@ -308,6 +313,9 @@ int main(int argc, char *argv[])
         map_pi_operation(m1, N);
         map_tang_module_operation(m2_init, m2, N/2);
 
+		#pragma omp atomic update
+        p_counter += 1;
+
         // Merge
         merge_power(m1, m2, N/2);
 
@@ -319,7 +327,7 @@ int main(int argc, char *argv[])
 		results[i-1] = reduced;
 
 		#pragma omp atomic update
-        p_counter += 100 / total;
+        p_counter += 1;
         //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
 	}
 
@@ -333,10 +341,10 @@ int main(int argc, char *argv[])
         t_delta = 1000 * (T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
     #endif
 
-//    if(pthread_join(process_thread, NULL)) {
-//        fprintf(stderr, "\nError joining progress thread");
-//        return 2;
-//    }
+    if(pthread_join(process_thread, NULL)) {
+        fprintf(stderr, "\nError joining progress thread");
+        return 2;
+    }
 
     printf("\n--------------------------------");
     printf("\n%14c|%14c|%14c\n", 'R', 'I', 'N');
