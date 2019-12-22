@@ -291,7 +291,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    #pragma omp parallel for default(none) private(i) shared(A, N, total, results, p_counter)
 	for(i=1;i<=total;i++)
 	{
         double m1[N], m2[N / 2], m2_init[N / 2];

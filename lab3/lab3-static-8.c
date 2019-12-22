@@ -9,7 +9,6 @@ void generate_m1(double *m1, int max, int A, unsigned int *cycle)
     int i;
 
 //    #pragma omp parallel for default(none) private(i) shared(m1, max, A, cycle) ordered schedule(dynamic)
-    #pragma omp parallel for default(none) private(i) shared(m1, max, A, cycle) schedule(static, 8)
     for(i=0;i<max;i++)
     {
         int random = rand_r(cycle);
@@ -29,7 +28,6 @@ void generate_m2(double *m2, int max, int A, unsigned int *cycle)
 {
     int i;
 
-    #pragma omp parallel for default(none) private(i) shared(m2, max, A, cycle) schedule(static, 8)
     for(i=0;i<max;i++)
     {
         int random = rand_r(cycle);
@@ -175,7 +173,6 @@ int main(int argc, char *argv[])
 
 	gettimeofday(&T1, NULL);
 
-    #pragma omp parallel for default(none) private(i) shared(A, N, total, results) schedule(static, 8)
 	for(i=1;i<=total;i++)
 	{
         double m1[N], m2[N / 2], m2_init[N / 2];
