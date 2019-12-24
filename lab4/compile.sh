@@ -1,6 +1,6 @@
 #!/bin/bash
 
-labs=(lab4 lab4-runner)
+labs=(lab4 lab4-runner lab4-runner-section)
 
 suffixes=()
 
