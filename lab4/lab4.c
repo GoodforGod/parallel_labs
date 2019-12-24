@@ -170,9 +170,9 @@ void sort_grome(double *m2, int from, int to)
             m2[i-1] = tmp;
             --i;
 
-            if(i == 0)
+            if(i == from)
             {
-                i = 1;
+                i = from + 1;
             }
         }
     }
@@ -183,7 +183,11 @@ void sort_grome(double *m2, int from, int to)
 void sort(double *m2, int size)
 {
     int l = 0, m = size / 2, r = size;
-    #pragma omp parallel default(none) shared(m2, size, l, m, r)
+//    printf("\nM2: BEFORE SORT size - %d", size);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: BEFORE SORT operation: %f", m2[i]);
+
+    #pragma omp parallel default(none) shared(m2, l, m, r)
     {
         #pragma omp sections // divides the team into sections
         {
@@ -198,9 +202,46 @@ void sort(double *m2, int size)
         }
     }
 
+//    printf("\nM2: AFTER SORT size - %d", size);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: AFTER SORT operation: %f", m2[i]);
+
     merge(m2, l, m, r);
+
+//    printf("\nM2: AFTER SORT AND MERGE size - %d", size);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: AFTER SORT AND MERGE operation: %f", m2[i]);
 }
 
+void sort_num(double *m2, int size)
+{
+    int threads = omp_get_num_threads();
+    int i, part = size / threads;
+
+    #pragma omp parallel for default(none) private(i) shared(m2, part, size)
+    for(i=0;i<size;i+=part)
+    {
+        sort_grome(m2, i, i + part);
+    }
+
+//    printf("Threads: %d", threads);
+    int inter = threads;
+    while(inter > 2)
+    {
+        if(inter % 2 != 0)
+            inter-=1;
+
+        int step = size / inter;
+//        printf("MERGE FOR inter: %d and step: %d", inter, step);
+        #pragma omp parallel for default(none) private(i) shared(m2, part, size, step)
+        for(i=0;i<size;i=i+step+step)
+            merge(m2, i, i + step, i + step + step);
+
+        inter/=2;
+    }
+
+    merge(m2, 0, size / 2, size);
+}
 
 double get_min(double *m2, int size)
 {
