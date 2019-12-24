@@ -1,0 +1,397 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <math.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#ifdef _OPENMP
+    #include <omp.h>
+#else
+    int omp_get_num_procs() { return 1;}
+#endif
+
+void generate_m1(double *m1, int max, int A, unsigned int *cycle)
+{
+    int i;
+
+    #pragma omp parallel for default(none) private(i) shared(m1, max, A, cycle) ordered schedule(dynamic)
+    for(i=0;i<max;i++)
+    {
+        int random;
+        #pragma omp ordered
+        {
+            random = rand_r(cycle);
+        }
+        double rand = ((double)random / RAND_MAX) * A + 1;
+//        printf("\nRandom: %d, Rand M1: %f", random, rand);
+        m1[i] = rand;
+    }
+
+//    printf("\nArray M1 filled.");
+}
+
+void generate_m2(double *m2, int max, int A, unsigned int *cycle)
+{
+    int i;
+
+    #pragma omp parallel for default(none) private(i) shared(m2, max, A, cycle) ordered schedule(dynamic)
+    for(i=0;i<max;i++)
+    {
+        int random;
+        #pragma omp ordered
+        {
+            random = rand_r(cycle);
+        }
+        double rand = ((double)random / RAND_MAX) * A * 9 + A;
+//        printf("\nRandom: %d, Rand M1: %f", random, rand);
+        m2[i] = rand;
+    }
+
+//    printf("\nArray M2 filled.");
+}
+
+// 5
+void map_pi_operation(double *arr, int size)
+{
+    int i;
+    #pragma omp parallel for default(none) private(i) shared(arr, size)
+    for(i=0;i<size;i++)
+    {
+        arr[i] = pow((double)arr[i] / (double)M_PI, 3);
+//        printf("\nM1: %d, AFTER POW operation: %f", i, arr[i]);
+    }
+//    printf("\nPI map operation finished.");
+}
+
+// 3
+void map_tang_module_operation(double *input, double *res, int size)
+{
+    int i;
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, BEFORE ADD operation: %f", i, arr[i]);
+
+    #pragma omp parallel for default(none) private(i) shared(input, res, size)
+    for(i=size;i>0;i--)
+        res[i] = fabs(tan((double) input[i-1] + input[i]));
+    res[0] = fabs(tan(input[0]));
+
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, AFTER ABS TAN operation: %f", i, arr[i]);
+//    printf("\nTang module map operation finished.");
+}
+
+// 1
+void merge_power(double *m1, double *m2, int size)
+{
+    int i;
+    #pragma omp parallel for default(none) private(i) shared(m1, m2, size)
+    for(i=0;i<size;i++)
+    {
+//        printf("\nBefore merge M1: %f, M2: %f", m1[i], m2[i]);
+        m2[i] = (double) pow(m1[i], m2[i]);
+//        printf("\nM2: %d, AFTER POW MERGE operation: %f", i, m2[i]);
+    }
+
+//    printf("\nMerge power finished.");
+}
+
+// Merges two subarrays of arr[].
+// First subarray is arr[l..m]
+// Second subarray is arr[m+1..r]
+void merge(double *arr, int l, int m, int r)
+{
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 =  r - m;
+
+    /* create temp arrays */
+    double L[n1], R[n2];
+
+    /* Copy data to temp arrays L[] and R[] */
+    for (i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[m + 1+ j];
+
+    /* Merge the temp arrays back into arr[l..r]*/
+    i = 0; // Initial index of first subarray
+    j = 0; // Initial index of second subarray
+    k = l; // Initial index of merged subarray
+    while (i < n1 && j < n2)
+    {
+        if (L[i] <= R[j])
+        {
+            arr[k] = L[i];
+            i++;
+        }
+        else
+        {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+
+    /* Copy the remaining elements of L[], if there
+       are any */
+    while (i < n1)
+    {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    /* Copy the remaining elements of R[], if there
+       are any */
+    while (j < n2)
+    {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+// 5
+void sort_grome(double *m2, int from, int to)
+{
+    int i, tmp;
+//    #pragma omp parallel for default(none) private(i, tmp) shared(m2, size)
+    for(i=from+1;i<to;)
+    {
+        if(m2[i-1] <= m2[i])
+        {
+            ++i;
+        }
+        else
+        {
+            tmp = m2[i];
+            m2[i] = m2[i-1];
+            m2[i-1] = tmp;
+            --i;
+
+            if(i == from)
+            {
+                i = from + 1;
+            }
+        }
+    }
+
+//    printf("\nArray sorted with first elem: %f and last: %f", m2[0], m2[size-1]);
+}
+
+void sort(double *m2, int size)
+{
+    int l = 0, m = size / 2, r = size;
+//    printf("\nM2: BEFORE SORT size - %d", size);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: BEFORE SORT operation: %f", m2[i]);
+
+    #pragma omp parallel default(none) shared(m2, l, m, r)
+    {
+        #pragma omp sections // divides the team into sections
+        {
+            #pragma omp section
+            {
+                sort_grome(m2, l, m);
+            }
+            #pragma omp section
+            {
+                sort_grome(m2, m, r);
+            }
+        }
+    }
+
+//    printf("\nM2: AFTER SORT size - %d", size);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: AFTER SORT operation: %f", m2[i]);
+
+    merge(m2, l, m, r);
+
+//    printf("\nM2: AFTER SORT AND MERGE size - %d", size);
+//    for(i=0;i<size;i++)
+//        printf("\nM2: AFTER SORT AND MERGE operation: %f", m2[i]);
+}
+
+void sort_num(double *m2, int size)
+{
+    int threads = omp_get_num_threads();
+    int i, part = size / threads;
+
+    #pragma omp parallel for default(none) private(i) shared(m2, part, size)
+    for(i=0;i<size;i+=part)
+    {
+        sort_grome(m2, i, i + part);
+    }
+
+//    printf("Threads: %d", threads);
+    int inter = threads;
+    while(inter > 2)
+    {
+        if(inter % 2 != 0)
+            inter-=1;
+
+        int step = size / inter;
+//        printf("MERGE FOR inter: %d and step: %d", inter, step);
+        #pragma omp parallel for default(none) private(i) shared(m2, part, size, step)
+        for(i=0;i<size;i=i+step+step)
+            merge(m2, i, i + step, i + step + step);
+
+        inter/=2;
+    }
+
+    merge(m2, 0, size / 2, size);
+}
+
+double get_min(double *m2, int size)
+{
+    int i;
+//    for(i=0;i<size;i++)
+//        printf("\nM2: %d, AT SORT operation: %f", i, m2[i]);
+
+    for(i=0;i<size;i++)
+    {
+        if(fabs(m2[i]) >= 0.000000000000001)
+        {
+//            printf("\nFound min: %f", m2[i]);
+            return m2[i];
+        }
+    }
+
+
+    return m2[0];
+}
+
+double reduce(double *m2, int size)
+{
+    double sum = 0;
+    double min = get_min(m2, size);
+
+    int i;
+    #pragma omp parallel for default(none) private(i) shared(m2, size, min) reduction(+:sum)
+    for(i=0;i<size;i++)
+    {
+        long temp = (long) ((long)m2[i] / (long)min);
+        if (temp % 2 == 0)
+        {
+            double value = sin(m2[i]);
+            //printf("\nMatch for I: %d with reduced for M2: %f: %f", i, value, m2[i]);
+            if(!isnan(value))
+            {
+                sum += value;
+//                printf("\nTemp reduced sum: %f", sum);
+            }
+//            else
+//            {
+//                printf("\nValue is invalid: %f", value);
+//            }
+        }
+    }
+
+    //printf("\nArray reduced with value: %f", sum);
+
+    return sum;
+}
+
+void print_percentage(int p)
+{
+    int i;
+    printf("[");
+    for(i=0;i<p / 5;i++)
+        printf("#");
+
+    printf("] %d%% done...\r", p);
+    fflush(stdout);
+}
+
+void *print_process(void *void_reduced)
+{
+    int* reduced_counter = (int*) void_reduced;
+    while(*reduced_counter < 100)
+    {
+        print_percentage(*reduced_counter);
+        sleep(1);
+    }
+
+    print_percentage(100);
+    return NULL;
+}
+
+int main(int argc, char *argv[])
+{
+	int i,N, A = 300, total = 50, p_counter = 0;
+	struct timeval T1, T2;
+	double T_1, T_2, t_delta;
+	N = atoi(argv[1]);
+
+	double results[total];
+
+    #ifdef _OPENMP
+        T_1 = omp_get_wtime();
+    #endif
+
+    gettimeofday(&T1, NULL);
+
+    pthread_t process_thread;
+    if(pthread_create(&process_thread, NULL, print_process, &p_counter)) {
+        fprintf(stderr, "\nError creating progress thread");
+        return 1;
+    }
+
+	for(i=1;i<=total;i++)
+	{
+        double m1[N], m2[N / 2], m2_init[N / 2];
+        unsigned int seed = (unsigned int) i;
+        //printf("\nSeed: %d", seed);
+		srand(seed);
+
+		// Array init
+		generate_m1(m1, N, A, &seed);
+		generate_m2(m2_init, N/2, A, &seed);
+
+        // Map
+        map_pi_operation(m1, N);
+        map_tang_module_operation(m2_init, m2, N/2);
+
+		#pragma omp atomic update
+        p_counter += 1;
+
+        // Merge
+        merge_power(m1, m2, N/2);
+
+        // Sort
+        sort(m2, N/2);
+
+        // Reduce
+        double reduced = reduce(m2, N/2);
+		results[i-1] = reduced;
+
+		#pragma omp atomic update
+        p_counter += 1;
+        //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
+	}
+
+	p_counter+=100;
+    gettimeofday(&T2, NULL);
+
+    #ifdef _OPENMP
+        T_2 = omp_get_wtime();
+        t_delta = (T_2 - T_1) * 1000;
+    #else
+        t_delta = 1000 * (T2.tv_sec - T1.tv_sec) + (T2.tv_usec - T1.tv_usec) / 1000;
+    #endif
+
+    if(pthread_join(process_thread, NULL)) {
+        fprintf(stderr, "\nError joining progress thread");
+        return 2;
+    }
+
+    printf("\n--------------------------------");
+    printf("\n%14c|%14c|%14c\n", 'R', 'I', 'N');
+	for(i=0;i<total;i++)
+        printf("%14f|%14d|%14d\n", results[i], i, N);
+
+    printf("\nN=%d. Millie's passed: %ld\n", N, (long) t_delta);
+
+	return 0;
+}
