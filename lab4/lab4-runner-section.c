@@ -326,11 +326,11 @@ int main(int argc, char *argv[])
                 p_counter += 1;
                 //printf("\nReduced number: %f for I: %d and N: %d\n", reduced, i, N);
             }
+
+            gettimeofday(&T2, NULL);
+            p_counter+=100;
         }
     }
-
-	p_counter+=100;
-    gettimeofday(&T2, NULL);
 
     #ifdef _OPENMP
         T_2 = omp_get_wtime();
