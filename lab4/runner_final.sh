@@ -25,7 +25,7 @@ do
     done
 done
 
-N_MIN_STEP=213
+N_MIN_STEP=215
 echo "N(min) to N1 processing..."
 for lab in ${labs[@]}
 do
@@ -45,7 +45,7 @@ do
 #        echo "Iteration $i complete for N: $N, with avg: $avg"
     done
 
-    last=$((33))
+    last=$((50))
     echo "$lab: From '$1' To '$last' with '$N_MIN_STEP' Step"
     echo "$lab: ALL: ${runs[@]}"
     sum=$(echo "${runs[@]/%/+} 0" | bc)
