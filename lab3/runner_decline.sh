@@ -12,7 +12,7 @@ runs=()
 
 labs_source=(lab3-dynamic-mp lab3-static-mp lab3-guided-mp)
 
-suffixes=(-4 -8 -16 -25 -32 -128)
+suffixes=(-4 -8 -16 -25 -32 -128 -1024)
 
 for lab in ${labs_source[@]}
 do
