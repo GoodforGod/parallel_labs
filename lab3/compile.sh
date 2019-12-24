@@ -2,7 +2,7 @@
 
 labs=(lab3-dynamic lab3-static lab3-guided)
 
-suffixes=(-4 -8 -16 -25 -32 -128)
+suffixes=(-4 -8 -16 -25 -32 -128 -1024)
 
 gcc -O2 -Wall -Werror -o lab3-mp lab3.c -lm -fopenmp
 echo "OpenMP lab3.c compiled."
