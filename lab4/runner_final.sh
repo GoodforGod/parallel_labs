@@ -63,14 +63,14 @@ do
     do
         iteration=()
         N=$(($1 + i * $2))
-        for run in {1..10}
+        for run in {1..3}
         do
             millis=$(./${lab} ${N} | tail -1 | grep -Eo "[0-9]+$")
             iteration+=(${millis})
         done
 
         sum=$(echo "${iteration[@]/%/+} 0" | bc)
-        avg=$((sum / 10))
+        avg=$((sum / 3))
         runs+=(${avg})
 #        echo "Iteration $i complete for N: $N, with avg: $avg"
     done
